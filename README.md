@@ -9,6 +9,16 @@ put two different folders for each one, the CSV results and the PDF catalog.
 OBS had the most inconsistent data, so those will probably be problems later on
 in the process.
 
+### Progress
+
+#### Fasig Tipton
+
+Stored in `/data/ft/csv` and `/data/ft/pdf`
+
+| Year | Status |
+|------|--------|
+| 2026 | 
+
 ## Schema
 
 5 tables.
