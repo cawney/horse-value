@@ -62,3 +62,13 @@ This is a pretty self explanatory table. It just shows the path of what was
 imported and when it was imported so that if I need to go back and see if there
 is a problem with the table, it can be traced easier. Most unnecessary table
 in my opinion.
+
+# KEELAND PDF SCHEMA
+
+It looks likes getting the big PDF for each sale catalog will be a little more
+difficult than I thought. The URL schema might be the way to go. I can work on
+building out a script for it. This is what it is for the first horse in the
+Sept 2026 Sale: [link](https://secure.keeneland.com/sales/k226/pdfs/1.pdf). I
+think the k226 will be the term that needs to change per sale. Worst case
+scenario is I need to get a URL for each sale then just run that through a
+script till I have downloaded all the individual pages.
