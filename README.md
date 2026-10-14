@@ -72,3 +72,18 @@ Sept 2026 Sale: [link](https://secure.keeneland.com/sales/k226/pdfs/1.pdf). I
 think the k226 will be the term that needs to change per sale. Worst case
 scenario is I need to get a URL for each sale then just run that through a
 script till I have downloaded all the individual pages.
+
+## URL update
+
+Once you get to the sale URL, change a hip.pdf to 'fullsale.pdf' to access the
+full sale PDF. Change the YY to the last two digits in the year.
+
+* November HORA:     /k6YY/ OR /NovYY/
+* November Breeding: /k3YY/
+* Champions:         /d1YY/
+* September:         /k2YY/ OR /SepYY/
+* April HORA:        /k5YY/ OR /AprYY/
+* January:           /k4YY/ OR /JanYY/
+
+
+
