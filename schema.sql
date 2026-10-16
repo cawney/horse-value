@@ -18,8 +18,8 @@ CREATE TABLE horses (
 	sex		TEXT,
 	color		TEXT,
 	is_stallion	INTEGER DEFAULT 0,	-- set when a name appears in the 3x as sire or bms
-	sire_id		INTEGER REFERENCES horse(horse_id),
-	dam_id		INTEGER REFERENCES horse(horse_id),
+	sire_id		INTEGER REFERENCES horses(horse_id),
+	dam_id		INTEGER REFERENCES horses(horse_id),
 	UNIQUE (sire_id, dam_id, year_foaled)
 );
 

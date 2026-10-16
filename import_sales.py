@@ -274,7 +274,7 @@ def tables_exist(conn):
     return {"horses", "sale_events", "sales", "raw_sales"} <= names
 
 
-def find_horse(conn, name_norm, country, year_foled, sire_id, dam_id):
+def find_horse(conn, name_norm, country, year_foaled, sire_id, dam_id):
     """See if the horse name is real and can find it, if not, use parents and
     year foaled. In horses, that's as close to unique as you can get"""
     if name_norm:
@@ -323,7 +323,7 @@ def upsert_horse(conn, stats, name, country, *, year_foaled=None, sex=None,
                 (name, name_norm, country, year_foaled, sex, color, is_stallion,
                  sire_id, dam_id)
         )
-        stats["horse_new"] += 1
+        stats["horses_new"] += 1
         return cur.lastrowid
     
     old = conn.execute("SELECT name, name_norm FROM horses WHERE horse_id = ?", (hid,)).fetchone()
@@ -415,6 +415,16 @@ def transform_row(raw, header_map, path):
     }
 
 
+def validate(row):
+    if not row["hip"]:
+        return "missing hip"
+    if not row["dam"][0]:
+        return "missing dam"
+    if not row["status"]:
+        return "no price, now out, no RNA marker in buyer. Can't tell what happened"
+    return None
+
+
 def import_row(conn, row, sale_id, source_file, stats):
     """Write one sale: stallions, dam, the horse itself, then the sales row."""
     damsire_id = upsert_horse(conn, stats, *row["damsire"], is_stallion=1)
@@ -468,14 +478,14 @@ def import_file(conn, path, company):
     for row in rows:
         groups.setdefault(row["sale_name"], []).append(row)
  
-    file_year = year_from_filename(path)
+    file_year = year_from_filepath(path)
     for sale_name, group in groups.items():
         dates = [r["sale_date"] for r in group if r["sale_date"]]
         if dates:
             start_date = min(dates)
         elif file_year:
             # Kee "NOV 2021" -> 2021-11-01; no month anywhere (OBS) -> January 1
-            month = month_from_text(sale_name, path.stem) or 1
+            month = month_from_texts(sale_name, path.stem) or 1
             start_date = f"{file_year}-{month:02d}-01"
             print(f"  ~~ {path.name}: no sale dates in the file, start_date estimated as "
                   f"{start_date} from the sale/file name")
