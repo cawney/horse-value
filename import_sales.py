@@ -176,7 +176,7 @@ def clean_price(value):
     """take away $ and , from money"""
     if not value:
         return None
-    digits = re.sub(r"[^d.]", "", value)
+    digits = re.sub(r"[^\d.]", "", value)
     if not digits:
         return None
     try:
@@ -295,11 +295,11 @@ def find_horse(conn, name_norm, country, year_foaled, sire_id, dam_id):
             """
             SELECT horse_id FROM horses
             WHERE dam_id = ? AND year_foaled = ?
-                AND (sire_id = ? OR side_id IS NULL OR ? IS NULL)
+                AND (sire_id = ? OR sire_id IS NULL OR ? IS NULL)
             ORDER BY (name_norm IS ?) DESC
             LIMIT 1
             """,
-            (dam_id, year_foled, sire_id, name_norm),
+            (dam_id, year_foaled, sire_id, sire_id, name_norm),
         ).fetchone()
         if row:
             return row[0]
