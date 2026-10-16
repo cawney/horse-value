@@ -111,7 +111,7 @@ MONTHS = {m: i for i, m in enumerate(
 ###############################################################################
 
 
-def normalizate_header(h: str) -> str:
+def normalize_header(h: str) -> str:
     h = h.strip().lower().replace("_", " ").replace("-", " ") # Get rid of _ and -
     h = re.sub(r"[^a-z0-9# ]", "", h)
     return re.sub(r"\s+", " ", h).strip() # remove extra spaces
@@ -173,7 +173,7 @@ def clean_text(value):
 
 
 def clean_price(value):
-    """take away \$ and , from money"""
+    """take away $ and , from money"""
     if not value:
         return None
     digits = re.sub(r"[^d.]", "", value)
@@ -216,14 +216,14 @@ def derive_status(out_flag, private_flag, price, buyer):
     going to be out, an RNA, private sale, etc. Each company puts slightly
     different logic behind that, so this hsould catch that"""
 
-    b = re.sub(r"\s+", " ", (buyer or "").strip.upper())
-    if (out_flag or "").strip.upper() not in NO_OUT_VALUES:
+    b = re.sub(r"\s+", " ", (buyer or "").strip().upper())
+    if (out_flag or "").strip().upper() not in NO_OUT_VALUES:
         return "OUT" # Checks the out column, and if the value is not in no out values array, then it's out
     if BUYER_OUT_RE.match(b):
         return "OUT" # checks the regex for OUT
     if BUYER_NOT_SOLD_RE.match(b) or BUYER_RNA_RE.match(b):
         return "RNA" # checks the regex for RNA
-    if (private_flag or "").strip.upper() == "Y" and price:
+    if (private_flag or "").strip().upper() == "Y" and price:
         return "PRIVATE" # checks to see if private sale is yes and there's a price
     if price:
         return "SOLD"
