@@ -563,7 +563,7 @@ def main():
         conn.execute("BEGIN")
  
     for folder, company in COMPANY_FOLDERS.items():
-        for path in sorted((data_dir / folder).glob("*.csv")):
+        for path in sorted((data_dir / folder/ "csv").glob("*.csv")):
             conn.execute("SAVEPOINT file" if args.dry_run else "BEGIN")
             try:
                 stats, unmapped = import_file(conn, path, company)
