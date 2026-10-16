@@ -284,7 +284,7 @@ def find_horse(conn, name_norm, country, year_foaled, sire_id, dam_id):
             ).fetchall()
         for hid, yob, dam in rows:
             # same name, but different dams or different foaling years, annoying.
-            if foal_year is not None and yob is not None and yob != year_foaled:
+            if year_foaled is not None and yob is not None and yob != year_foaled:
                 continue
             if dam_id is not None and dam is not None and dam != dam_id:
                 continue
