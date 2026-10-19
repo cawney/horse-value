@@ -11,13 +11,10 @@ in the process.
 
 ### Progress
 
-#### Fasig Tipton
+All sales have been downloaded and the database is complete. What is left
+before I have a viable MVP is a front end website, which my goal is to use
+GitHub Pages for that along with one of the SQL.JS tools.
 
-Stored in `/data/ft/csv` and `/data/ft/pdf`
-
-| Year | Status |
-|------|--------|
-| 2026 | 
 
 ## Schema
 
