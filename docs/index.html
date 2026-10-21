@@ -88,6 +88,7 @@
                       <th>Sire</th>
                     </tr>
                   </thead>
+                  <tbody id="results"></tbody>
                 </table>
               </div>
             </div>
@@ -107,14 +108,14 @@
                 abs("sql-wasm.wasm")
             ).then(async worker => {
               db = worker.db;
-              const btn = document.getElementByID("search-btn");
+              const btn = document.getElementById("search-btn");
               btn.disabled = false;
               btn.textContent = "Search";
             }).catch(err => {
               document.getElementById("status").textContent = "Error: " + err;
             });
 
-            document.getElementByID("search-form").addEventListener("submit", async e => {
+            document.getElementById("search-form").addEventListener("submit", async e => {
               e.preventDefault();
               const dam = normalize(document.getElementById("dam").value);
               const yob = document.getElementById("yob").value;
@@ -147,10 +148,10 @@
                     tr.insertCell().textContent = v;
                   }
                 }
-                status.TextContent = rows.length === 100 ? "First 100 matches. Type more of the dam name to narrow it."
+                status.textContent = rows.length === 100 ? "First 100 matches. Type more of the dam name to narrow it."
                                                          : `${rows.length} match${rows.length === 1 ? "" : "es"}`;
               } catch (err) {
-                status.textConent = "Error: " + err;
+                status.textContent = "Error: " + err;
               }
             });
             </script>
