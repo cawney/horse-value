@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" />
   </head>
-  <body class="layout-fixed sidebar-expand-lg bg-body-tertairy">
+  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
       <nav class='app-header navbar navbar-expand bg-body'>
         <div class="container-fluid">
@@ -111,7 +111,7 @@
               btn.disabled = false;
               btn.textContent = "Search";
             }).catch(err => {
-              document.getElementById("out").textContent = "Error: " + err;
+              document.getElementById("status").textContent = "Error: " + err;
             });
 
             document.getElementByID("search-form").addEventListener("submit", async e => {
