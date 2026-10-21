@@ -1,0 +1,9 @@
+{
+  "severMode": "chunked",
+  "urlPrefix": "horses.db.",
+  "suffixLength": 3,
+  "serverChunkSize": 4096,
+  "databaseLengthBytes": 4096,
+  "requestChunkSize": 4096,
+  "cacheBust": "1792597441"
+}
