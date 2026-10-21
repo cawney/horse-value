@@ -16,7 +16,7 @@ config = {
         "serverChunkSize":      size,
         "databaseLengthBytes":  size,
         "requestChunkSize":     4096,
-        "casheBust":            str(int(time.time())),
+        "cacheBust":            str(int(time.time())),
         }
 (db.parent / "db-config.json").write_text(json.dumps(config, indent=2))
 print(f"db-config.json written. Used horses.db; {size:,} bytes")
