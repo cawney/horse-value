@@ -4,14 +4,14 @@ run this any time you import more horses before you commit and push."""
 import json, time
 from pathlib import Path
 
-db = Path(__file__).resolve().parent.partent / "docs" / "horses.db"
+db = Path(__file__).resolve().parent.parent / "docs" / "horses.db"
 if not db.is_file():
     raise SystemExit("DB Not found")
 
 size = db.stat().st_size
 config = {
         "serverMode":           "chunked",
-        "urlPrefix":            "horses.db?part="
+        "urlPrefix":            "horses.db?part=",
         "suffixLength":         1,
         "serverChunkSize":      size,
         "databaseLengthBytes":  size,
