@@ -73,8 +73,7 @@
                   const abs = p => new URL(p, document.baseURI).toString();
 
                   createDbWorker(
-                    [{ from: "inline",
-                       config: {serverMode: "full", url: abs("horses.db"), requestChunkSize: 4096 } }],
+                    [{ from: "jsonconfig", configUrl: abs("db-config.json?v=" + Date.now()) }],
                     abs("sqlite.worker.js"),
                     abs("sql-wasm.wasm")
                 ).then(async worker => {
