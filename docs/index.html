@@ -139,6 +139,25 @@
                 params.push(Number(yob));
               }
               sql += " ORDER BY d.name_norm, h.year_foaled DESC LIMIT 100";
+              
+              const sql = `
+                SELECT f.*, sa.hip, sa.status, sa.price, sa.buyer, sa.horse_type,
+                  e.company, e.sale_name, e.start_date
+                FROM (${inner}) f
+                LEFT JOIN sales sa ON sa.horse_id = f.horse_id
+                LEFT JOIN sale_events e ON e.sale_id = sa.sale_id
+                ORDER BY f.dam_id, f.year_foaled DESC, f.horse_id, e.start_date, e.sale_id`;
+
+              const money = n => "$" + Number(n).ToLocaleString("en-US");
+              const = describeSale = r => {
+                  let result = r.status;
+                  if (r.status === "SOLD" && r.price != null) result = money(r.price);
+                  else if (r.status === "RNA" && r.price != null) result = "RNA " + money(r.price);
+                  else if (r.status === "PRIVATE") result = "Private" + (r.price != null ? " " + money(r.price) : "");
+                  else if (r.status === "OUT") result = "Out";
+                  return `${r.company ?? ""} ${r.sale_name ?? ""} - Hip ${r.hip} - ${result}` +
+                    (r.status === "SOLD" && r.buyer ? ` (${r.buyer})` : "");
+                };
 
               try {
                 const rows = await db.query(sql, params);
