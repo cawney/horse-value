@@ -129,7 +129,7 @@
 
               //Dam names... starting with what was typed
               let inner = `
-                SELECT h.name, h.year_foaled, d.name AS dam, s.name AS sire
+                SELECT h.horse_id, h.name, h.year_foaled, d.dam AS dam, d.name_norm AS dam_norm, s.name AS sire
                 FROM horses d
                 JOIN horses h ON h.dam_id = d.horse_id
                 LEFT JOIN horses s ON s.horse_id = h.sire_id
@@ -147,9 +147,9 @@
                 FROM (${inner}) f
                 LEFT JOIN sales sa ON sa.horse_id = f.horse_id
                 LEFT JOIN sale_events e ON e.sale_id = sa.sale_id
-                ORDER BY f.dam_id, f.year_foaled DESC, f.horse_id, e.start_date, e.sale_id`;
+                ORDER BY f.dam_norm, f.year_foaled DESC, f.horse_id, e.start_date, e.sale_id`;
 
-              const money = n => "$" + Number(n).ToLocaleString("en-US");
+              const money = n => "$" + Number(n).toLocaleString("en-US");
               const describeSale = r => {
                   let result = r.status;
                   if (r.status === "SOLD" && r.price != null) result = money(r.price);
@@ -162,14 +162,33 @@
 
               try {
                 const rows = await db.query(sql, params);
-                for (const r of rows) {
+
+                const horses = new Map();
+                for (const r in rows) {
+                  if(!horses.has(horse_id)) horses.set(r.horse_id, { ...r, sales: [] });
+                  if(r.hip != null) horses.get(r.horse_id).sales.push(r);
+                }
+
+                for (const h in horses.value()) {
                   const tr = tbody.insertRow();
-                  for (const v of [r.name || "(unnamed)", r.year_foaled ?? "", r.dam, r.sire ?? ""]) {
+                  for (const v of [h.name || "(unnamed)", h.year_foaled ?? "", h.dam, h.sire ?? ""]) {
                     tr.insertCell().textContent = v;
                   }
+                  const cell = tr.insertCell();
+                  if (h.sales.length === 0) {
+                    cell.textContent = "No sales";
+                    cell.className = "text body-secondary";
+                  }
+                  for (const sale of h.sales) {
+                    const line = document.createElement("div");
+                    line.textContent = describeSale(sale);
+                    if (sale.status != "SOLD") line.className = "text body-secondary";
+                    cell.appendChild(line);
+                  }
                 }
-                status.textContent = rows.length === 100 ? "First 100 matches. Type more of the dam name to narrow it."
-                                                         : `${rows.length} match${rows.length === 1 ? "" : "es"}`;
+                const n = horses.size;
+                status.textContent = n === 100 ? "First 100 matches. Be more specific for less results."
+                  : `${n} match${n === 1 ? "" : "es"}`;
               } catch (err) {
                 status.textContent = "Error: " + err;
               }
