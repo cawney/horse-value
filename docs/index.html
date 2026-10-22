@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hello World</title>
+    <title>Horse Value Capstone</title>
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
@@ -136,10 +136,10 @@
                 WHERE d.name_norm >= ? and d.name_norm < ?`;
               const params = [dam, dam + "\uffff"];
               if (yob) {
-                sql += " AND h.year_foaled = ?";
+                inner += " AND h.year_foaled = ?";
                 params.push(Number(yob));
               }
-              sql += " ORDER BY d.name_norm, h.year_foaled DESC LIMIT 100";
+              inner += " ORDER BY d.name_norm, h.year_foaled DESC LIMIT 100";
 
               const sql = `
                 SELECT f.*, sa.hip, sa.status, sa.price, sa.buyer, sa.horse_type,
