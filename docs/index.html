@@ -129,7 +129,7 @@
 
               //Dam names... starting with what was typed
               let inner = `
-                SELECT h.horse_id, h.name, h.year_foaled, d.dam AS dam, d.name_norm AS dam_norm, s.name AS sire
+                SELECT h.horse_id, h.name, h.year_foaled, d.dam_id AS dam, d.name_norm AS dam_norm, s.name AS sire
                 FROM horses d
                 JOIN horses h ON h.dam_id = d.horse_id
                 LEFT JOIN horses s ON s.horse_id = h.sire_id
