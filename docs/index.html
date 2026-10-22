@@ -18,7 +18,7 @@
               <a href="#" class="nav-link" data-lte-toggle="sidebar" role="button">
                 <i class="bi bi-list"></i>
               </a>
-            </li>  
+            </li>
           </ul>
         </div>
       </nav>
@@ -26,7 +26,7 @@
         <div class="sidebar-brand">
           <a href="#" class="brand-link">
             <span class="brand-text fw-light">Horse Value</span>
-          </a> 
+          </a>
         </div>
         <div class="sidebar-wrapper">
           <nav class="mt-2">
@@ -128,7 +128,7 @@
               tbody.innerHTML = "";
 
               //Dam names... starting with what was typed
-              let sql = `
+              let inner = `
                 SELECT h.name, h.year_foaled, d.name AS dam, s.name AS sire
                 FROM horses d
                 JOIN horses h ON h.dam_id = d.horse_id
@@ -140,7 +140,7 @@
                 params.push(Number(yob));
               }
               sql += " ORDER BY d.name_norm, h.year_foaled DESC LIMIT 100";
-              
+
               const sql = `
                 SELECT f.*, sa.hip, sa.status, sa.price, sa.buyer, sa.horse_type,
                   e.company, e.sale_name, e.start_date
@@ -150,7 +150,7 @@
                 ORDER BY f.dam_id, f.year_foaled DESC, f.horse_id, e.start_date, e.sale_id`;
 
               const money = n => "$" + Number(n).ToLocaleString("en-US");
-              const = describeSale = r => {
+              const describeSale = r => {
                   let result = r.status;
                   if (r.status === "SOLD" && r.price != null) result = money(r.price);
                   else if (r.status === "RNA" && r.price != null) result = "RNA " + money(r.price);
@@ -178,7 +178,7 @@
           </div>
         </div>
       </main>
-      
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"></script>
