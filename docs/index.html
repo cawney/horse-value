@@ -169,7 +169,7 @@
                   if(r.hip != null) horses.get(r.horse_id).sales.push(r);
                 }
 
-                for (const h in horses.values()) {
+                for (const h of horses.values()) {
                   const tr = tbody.insertRow();
                   for (const v of [h.name || "(unnamed)", h.year_foaled ?? "", h.dam, h.sire ?? ""]) {
                     tr.insertCell().textContent = v;
