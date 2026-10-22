@@ -129,7 +129,7 @@
 
               //Dam names... starting with what was typed
               let inner = `
-                SELECT h.horse_id, h.name, h.year_foaled, d.dam_id AS dam, d.name_norm AS dam_norm, s.name AS sire
+                SELECT h.horse_id, h.name, h.year_foaled, d.name AS dam, d.name_norm AS dam_norm, s.name AS sire
                 FROM horses d
                 JOIN horses h ON h.dam_id = d.horse_id
                 LEFT JOIN horses s ON s.horse_id = h.sire_id
@@ -164,12 +164,12 @@
                 const rows = await db.query(sql, params);
 
                 const horses = new Map();
-                for (const r in rows) {
-                  if(!horses.has(horse_id)) horses.set(r.horse_id, { ...r, sales: [] });
+                for (const r of rows) {
+                  if(!horses.has(r.horse_id)) horses.set(r.horse_id, { ...r, sales: [] });
                   if(r.hip != null) horses.get(r.horse_id).sales.push(r);
                 }
 
-                for (const h in horses.value()) {
+                for (const h in horses.values()) {
                   const tr = tbody.insertRow();
                   for (const v of [h.name || "(unnamed)", h.year_foaled ?? "", h.dam, h.sire ?? ""]) {
                     tr.insertCell().textContent = v;
