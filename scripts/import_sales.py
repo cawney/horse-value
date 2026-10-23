@@ -65,7 +65,7 @@ HEADER_ALIASES = {
         "buyer":        ["Buyer Name", "PURCHASER"],
         "price":        ["Hammer Price", "PRICE", "Sale Price"],
         "out":          ["out"],
-        "private":      ["private sale", "post sale indicator"],      
+        "private":      ["private sale", "post sale indicator"],
         "session":      ["session"],
         "horse_type":   ["sold as", "sold as description", "sold as code"],
         "sale_name":    ["sale", "sale title"],
@@ -183,7 +183,7 @@ def clean_price(value):
         return int(round(float(digits)))
     except ValueError:
         return None
-    
+
 
 def clean_int(value):
     if not value:
@@ -313,7 +313,7 @@ def upsert_horse(conn, stats, name, country, *, year_foaled=None, sex=None,
     name_norm = normalize_name(name)
     if not name_norm and not dam_id:
         return None # Can't search horse w/o those
-    
+
     hid = find_horse(conn, name_norm, country, year_foaled, sire_id, dam_id)
     if hid is None:
         cur = conn.execute(
@@ -325,7 +325,7 @@ def upsert_horse(conn, stats, name, country, *, year_foaled=None, sex=None,
         )
         stats["horses_new"] += 1
         return cur.lastrowid
-    
+
     old = conn.execute("SELECT name, name_norm FROM horses WHERE horse_id = ?", (hid,)).fetchone()
     if name_norm and old[1] and old[1] != name_norm: # If there is a name_norm, and old[1] is not None, and old[1] is not name_norm
         stats["name_conflicts"].append(f"{old[0]} / {name} (horse_id {hid}) -- kept {old[0]}")
@@ -374,7 +374,7 @@ def read_csv(path: Path):
     with path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         return reader.fieldnames or [], list(reader)
-    
+
 
 def transform_row(raw, header_map, path):
     r = {}
@@ -385,10 +385,19 @@ def transform_row(raw, header_map, path):
 
     price = clean_price(r.get("price"))
     status = derive_status(r.get("out"), r.get("private"), price, r.get("buyer"))
+
+    # dealing with price with something like RNA ($123,123)
+    if status == "RNA" and price is None:
+        m = re.search(r"\(([^)]*)\)", r.get("buyer") or "")
+        if m:
+            price = clean_price(m.group(1))
+
     buyer = clean_text(r.get("buyer"))
+    # if RNA, I still want to see the price
     if status not in ("SOLD", "PRIVATE"):
-        price = None
         buyer = None
+    if status not in ("SOLD", "PRIAVTE", "RNA"):
+        price = None
 
     consignor = " ".join(filter(None, (clean_text(r.get("consignor")),
                                        clean_text(r.get("consignor_2"))))) or None
@@ -445,39 +454,39 @@ def import_row(conn, row, sale_id, source_file, stats):
         row["price"], row["consignor"], row["buyer"], in_foal_to_id, source_file),
     )
 
- 
+
 def import_file(conn, path, company):
     stats = {"read": 0, "inserted": 0, "duplicate": 0, "horses_new": 0, "skipped": {},
              "name_conflicts": [], "bad_colors": []}
     source_file = path.name  # schema: file name, not path
- 
+
     def skip(reason, n=1):
         stats["skipped"][reason] = stats["skipped"].get(reason, 0) + n
- 
+
     if conn.execute(
         "SELECT 1 FROM raw_sales WHERE source_file = ? AND company = ?", (source_file, company)
     ).fetchone():
         stats["already_imported"] = True
         return stats, []
- 
+
     headers, raw_rows = read_csv(path)
     stats["read"] = len(raw_rows)
     header_map, unmapped = build_header_map(headers)
- 
+
     missing = {"hip", "dam"} - set(header_map.values())
     if missing:
         print(f"  !! {path.name}: no column found for {sorted(missing)} -- file skipped")
         print(f"     headers were: {headers}")
         skip("missing required column", len(raw_rows))
         return stats, unmapped
- 
+
     rows = [transform_row(r, header_map, path) for r in raw_rows]
- 
+
     # One file can hold more than one sale; group by sale name.
     groups = {}
     for row in rows:
         groups.setdefault(row["sale_name"], []).append(row)
- 
+
     file_year = year_from_filepath(path)
     for sale_name, group in groups.items():
         dates = [r["sale_date"] for r in group if r["sale_date"]]
@@ -492,13 +501,13 @@ def import_file(conn, path, company):
         else:
             skip("no sale date (add a date column or put the year in the file name)", len(group))
             continue
- 
+
         if int(start_date[:4]) < MIN_YEAR:
             skip(f"sale older than {MIN_YEAR}", len(group))
             continue
- 
+
         sale_id = get_sale_event(conn, company, sale_name, start_date)
- 
+
         for row in group:
             if row["color_raw"] and not row["color"]:
                 who = row["horse"][0] or f"{row['dam'][0] or '?'} foal"
@@ -514,7 +523,7 @@ def import_file(conn, path, company):
             ).fetchone():
                 stats["duplicate"] += 1
                 continue
- 
+
             conn.execute("SAVEPOINT row")
             try:
                 import_row(conn, row, sale_id, source_file, stats)
@@ -524,12 +533,12 @@ def import_file(conn, path, company):
             else:
                 stats["inserted"] += 1
             conn.execute("RELEASE row")
- 
+
     conn.execute("INSERT INTO raw_sales (source_file, company) VALUES (?, ?)",
                  (source_file, company))
     return stats, unmapped
- 
- 
+
+
 def main():
     ap = argparse.ArgumentParser(description="Import horse sale CSVs into SQLite.")
     ap.add_argument("--db", default="../horses.db")
@@ -540,28 +549,28 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="run the full import, then roll everything back")
     args = ap.parse_args()
- 
+
     data_dir = Path(args.data)
     if not data_dir.is_dir():
         sys.exit(f"Data folder not found: {data_dir}")
- 
+
     conn = sqlite3.connect(args.db, isolation_level=None)  # transactions managed below
- 
+
     if args.reset or not tables_exist(conn):
         schema_path = Path(args.schema)
         if not schema_path.is_file():
             sys.exit(f"Schema file not found: {schema_path}")
         print(f"Running {schema_path} ({'reset requested' if args.reset else 'new database'})")
         conn.executescript(schema_path.read_text())
- 
+
     conn.execute("PRAGMA foreign_keys = ON")  # per connection; must be set here too
- 
+
     all_unmapped = {}
     totals = {"read": 0, "inserted": 0, "duplicate": 0, "skipped": 0, "horses_new": 0}
- 
+
     if args.dry_run:
         conn.execute("BEGIN")
- 
+
     for folder, company in COMPANY_FOLDERS.items():
         for path in sorted(( data_dir / folder / "csv").glob("*.csv")):
             conn.execute("SAVEPOINT file" if args.dry_run else "BEGIN")
@@ -574,11 +583,11 @@ def main():
                 print(f"{company:4} {path.name:40} FAILED, nothing from this file kept: {e}")
                 continue
             conn.execute("RELEASE file" if args.dry_run else "COMMIT")
- 
+
             if stats.get("already_imported"):
                 print(f"{company:4} {path.name:40} already imported, skipped")
                 continue
- 
+
             skipped = sum(stats["skipped"].values())
             print(f"{company:4} {path.name:40} read {stats['read']:>5}  "
                   f"in {stats['inserted']:>5}  dup {stats['duplicate']:>4}  "
@@ -594,17 +603,17 @@ def main():
             for k in ("read", "inserted", "duplicate", "horses_new"):
                 totals[k] += stats[k]
             totals["skipped"] += skipped
- 
+
     if args.dry_run:
         conn.execute("ROLLBACK")
     conn.close()
- 
+
     print("\nTOTALS:", totals, "(dry run, nothing written)" if args.dry_run else "")
     if all_unmapped:
         print("\nUnmapped headers (add to HEADER_ALIASES if you need them):")
         for h, cos in sorted(all_unmapped.items()):
             print(f"  {h!r:30} seen in {', '.join(sorted(cos))}")
- 
- 
+
+
 if __name__ == "__main__":
-    main()   
+    main()
