@@ -388,6 +388,7 @@ def transform_row(raw, header_map, path):
 
     # dealing with price with something like RNA ($123,123)
     if status == "RNA" and price is None:
+        # catches `(` then groups anything that is not `)` then catches `)`
         m = re.search(r"\(([^)]*)\)", r.get("buyer") or "")
         if m:
             price = clean_price(m.group(1))
@@ -541,7 +542,7 @@ def import_file(conn, path, company):
 
 def main():
     ap = argparse.ArgumentParser(description="Import horse sale CSVs into SQLite.")
-    ap.add_argument("--db", default="../horses.db")
+    ap.add_argument("--db", default="../docs/horses.db")
     ap.add_argument("--data", default="../data")
     ap.add_argument("--schema", default="../schema.sql")
     ap.add_argument("--reset", action="store_true",
