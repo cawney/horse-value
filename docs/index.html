@@ -146,7 +146,7 @@
               const describeSale = r => {
                   let result = r.status;
                   if (r.status === "SOLD" && r.price != null) result = money(r.price);
-                  else if (r.status === "RNA" && r.price != null) result = "RNA " + money(r.price);
+                  else if (r.status === "RNA" && r.price != null) result = "RNA (" + money(r.price) + ")";
                   else if (r.status === "PRIVATE") result = "Private" + (r.price != null ? " " + money(r.price) : "");
                   else if (r.status === "OUT") result = "Out";
                   return `${r.company ?? ""} ${r.sale_name ?? ""} - Hip ${r.hip} - ${result}` +

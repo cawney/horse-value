@@ -95,6 +95,7 @@ COLOR_NAMES = {
         'DARK BAY OR BROWN':    'Dark Bay or Brown',
         'DKB':                  'Dark Bay or Brown',
         'DB/BR':                'Dark Bay or Brown',
+        'DK B/':                'Dark Bay or Brown',
         'CHESTNUT':             'Chestnut',
         'CH':                   'Chestnut',
         'GRAY OR ROAN':         'Grey or Roan',
@@ -137,6 +138,8 @@ def build_header_map(headers):
 # I haven't seen that yet, but digital sales have started doing that.
 UNNAMED_RE = re.compile(
         r"^(unnamed|n/?a|" #unnamed
+        r"hip \d+|" # Hip number for name
+        r"\d{4}-[A-Za-z ]+" # 2025-Dam Name
         r"(bay|dark bay|brown|dk b/br|chestnut|grey|gray|roan|b|ch|gr|ro|dkb)" # colors
         r"(\s*or\s*\w+)?\s+(colt|filly|mare|gelding|horse|ridgling|c|f|m|g|r))$", # OR like Grey OR roan
         re.IGNORECASE,
