@@ -88,7 +88,24 @@ def label_horses(in_path, out_path):
             dam            = at(15)
             dam_yob        = at(16)
 
-
+            horse = {
+                "name":           line,
+                "description":    description,
+                "sire_sire_sire": sire_sire_sire,
+                "sire_sire_dam":  sire_sire_dam,
+                "sire_dam_sire":  sire_dam_sire,
+                "sire_dam_dam":   sire_dam_dam,
+                "dam_sire_sire":  dam_sire_sire,
+                "dam_dam_sire":   dam_dam_sire,
+                "dam_dam_dam":    dam_dam_dam,
+                "sire_sire":      sire_sire,
+                "sire_dam":       sire_dam,
+                "dam_sire":       dam_sire,
+                "dam_dam":        dam_dam,
+                "sire":           sire,
+                "dam":            dam,
+                "dam_yob":        dam_yob,
+            }
 
             out.write(f"Name: {name}\n")
             out.write(f"Description: {description}\n")
@@ -106,6 +123,7 @@ def label_horses(in_path, out_path):
             out.write(f"Dam dam: {dam_dam}\n")
             out.write(f"Sire: {sire}\n")
             out.write(f"Dam: {dam} {dam_yob}\n")
+
 
         if page is not None and not found_name:
             out.write(f"PAGE {page}: no name line found\n\n")
