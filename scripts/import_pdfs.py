@@ -21,7 +21,8 @@ sire_line = re.compile(r"^By [A-Z '()-]+ \(\d{4}\)", re.MULTILINE)
 name_line = re.compile(r"^[A-Z][A-Z().' -]+$")
 page_line = re.compile(r"^--- PAGE (\d+) ---$")
 leaders = re.compile(r"\s*\.{2,}\s*$")
-
+any_year = re.compile(r"\d{4}")
+year_only = re.compile(r"^\((\d{4})\)\s*$")
 
 ###############################################################################
 # Text Extraction and labeling
@@ -68,9 +69,12 @@ def parse_horse(in_path):
 
         def at(offset):
             return leaders.sub("", lines[i + offset])
+        
+        yob = any_year.search(at(1))
 
         name = line
         description = at(1)
+        
 
         sire_sire_sire = at(2)
         sire_sire_dam  = at(3)
@@ -91,13 +95,16 @@ def parse_horse(in_path):
         dam_yob        = at(16)
 
         horse = {
+            "page":           page,
             "name":           line,
             "description":    description,
+            "yob":            yob,
             "sire_sire_sire": sire_sire_sire,
             "sire_sire_dam":  sire_sire_dam,
             "sire_dam_sire":  sire_dam_sire,
             "sire_dam_dam":   sire_dam_dam,
             "dam_sire_sire":  dam_sire_sire,
+            "dam_sire_dam":   dam_sire_dam,
             "dam_dam_sire":   dam_dam_sire,
             "dam_dam_dam":    dam_dam_dam,
             "sire_sire":      sire_sire,
@@ -108,27 +115,7 @@ def parse_horse(in_path):
             "dam":            dam,
             "dam_yob":        dam_yob,
         }
-
-        out.write(f"Name: {name}\n")
-        out.write(f"Description: {description}\n")
-        out.write(f"Sire sire sire: {sire_sire_sire}\n")
-        out.write(f"Sire sire dam: {sire_sire_dam}\n")
-        out.write(f"Sire dam sire: {sire_dam_sire}\n")
-        out.write(f"sire dam dam: {sire_dam_dam}\n")
-        out.write(f"Dam sire sire: {dam_sire_sire}\n")
-        out.write(f"Dam sire dam: {dam_sire_dam}\n")
-        out.write(f"Dam dam sire: {dam_dam_sire}\n")
-        out.write(f"Dam dam dam: {dam_dam_dam}\n")
-        out.write(f"Sire sire: {sire_sire}\n")
-        out.write(f"Sire dam: {sire_dam}\n")
-        out.write(f"Dam sire: {dam_sire}\n")
-        out.write(f"Dam dam: {dam_dam}\n")
-        out.write(f"Sire: {sire}\n")
-        out.write(f"Dam: {dam} {dam_yob}\n")
-
-
-    if page is not None and not found_name:
-        out.write(f"PAGE {page}: no name line found\n\n")
+        yield horse
 
 
 # Write Labeled horses
@@ -144,14 +131,18 @@ def write_review(horses, out_path):
         ("Dam dam", "dam_dam"), ("Dam YOB", "dam_yob"),
     ]
 
-    with open(out_path, "w", encoding="utf-8"):
+    with open(out_path, "w", encoding="utf-8") as out:
         for h in horses:
             for label, key in labels:
                 out.write(f"{label}: {h[key]}\n")
             out.write("\n")
 
 
-# Dicts to database...
+# Dicts to database..
+NAME_MATCH = "UPPER(RTRIM(name, '.'))"
+
+def match_form(name):
+    return name.rstrip(".").upper()
 def name_key(name):
     if not name:
         return None
@@ -189,9 +180,9 @@ def find_or_create_ancestor(cur, name, sire_id=None, dam_id=None):
     row = cur.execute("""
                       SELECT horse_id FROM horses
                       WHERE name_key = ?
-                        AND (side_id IS NULL or ? IS NULL OR sire_id = ?)
+                        AND (sire_id IS NULL or ? IS NULL OR sire_id = ?)
                         AND (dam_id  IS NULL or ? IS NULL OR dam_id  = ?)
-                      LIMIT 1""", (key, sire_id, sire_id, dam_id, dam_id)).fetchone()
+                      LIMIT 1""", (match_form(name), sire_id, sire_id, dam_id, dam_id)).fetchone()
 
     if row:
         cur.execute("""
@@ -207,7 +198,7 @@ def find_or_create_ancestor(cur, name, sire_id=None, dam_id=None):
 
 
 def insert_threecross(cur, h):
-    def a(name, side_id=None, dam_id=None):
+    def a(name, sire_id=None, dam_id=None):
         return find_or_create_ancestor(cur, name, sire_id, dam_id)
     
     sire_sire = a(h["sire_sire"], a(h["sire_sire_sire"]), a(h["sire_sire_dam"]))
@@ -229,8 +220,8 @@ def insert_threecross(cur, h):
 def load_into_db(horses, db_path):
     con = sqlite3.connect(db_path)
     cur = con.cursor()
-    cur.execute("CREATE INDEX IF NOT EXISTS inx_horses_name_key ON horses(name_key)")
-    cur.execute("CREATE INDEX IF NOT EXISTS inx_horses_dam_yob ON horses(dam_id, yob)")
+    cur.execute(f"CREATE INDEX IF NOT EXISTS inx_horses_name_key ON horses({NAME_MATCH})")
+    cur.execute("CREATE INDEX IF NOT EXISTS inx_horses_dam_yob ON horses(dam_id, year_foaled)")
     count = 0
     for h in horses:
         insert_threecross(cur, h)
