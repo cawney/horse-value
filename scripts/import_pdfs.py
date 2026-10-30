@@ -19,6 +19,9 @@ DB_FILE      = "../docs/horses.db"
 
 sire_line = re.compile(r"^By [A-Z '()-]+ \(\d{4}\)", re.MULTILINE)
 name_line = re.compile(r"^[A-Z][A-Z().' -]+$")
+unnamed = re.compile(r"^(BAY|DARK BAY OR BROWN|GRAY OR ROAN|BLACK|GRAY|ROAN|WHITE)\s+"
+                     r"(COLT|FILLY|GELDING|RIDGLING|HORSE|MARE)")
+country_re = re.compile(r"(.*?)\s*\(([A-Z]{2,3})\)$")
 page_line = re.compile(r"^--- PAGE (\d+) ---$")
 leaders = re.compile(r"\s*\.{2,}\s*$")
 any_year = re.compile(r"\d{4}")
@@ -70,8 +73,11 @@ def parse_horse(in_path):
         def at(offset):
             return leaders.sub("", lines[i + offset])
         
-        yob = any_year.search(at(1))
-
+        y = any_year.search(at(1))
+        if y:
+            yob = int(y[0])
+        else:
+            yob = None
         name = line
         description = at(1)
         
@@ -149,13 +155,24 @@ def name_key(name):
     n = name.upper()
     return " ".join(n.split())
 
+def split_name(name):
+    """returns name and country split"""
+    if not name:
+        return None, None
+    m = country_re.match(name)
+    core, country = (m[1], m[2]) if m else (name, None)
+    norm = " ".join(core.rstrip(".").upper().split())
+    return norm, country
+    
 
 # YOB and dam are as close to unique as you can get. Sometimes dam names
 # repeat, but it usually isn't an issue.
 def find_or_create_by_dam(cur, name, sire_id, dam_id, yob, page=None):
     row = cur.execute(
-        "SELECT horse_id, sire_id FROM horses WHERE dam_id = ? AND yob = ?",
-        (dam_id)).fetchone()
+        "SELECT horse_id, sire_id FROM horses WHERE dam_id = ? AND year_foaled = ?",
+        (dam_id, yob)).fetchone()
+    
+    norm, country = split_name(name)
 
     if row:
         horse_id, existing_sire = row
@@ -164,25 +181,27 @@ def find_or_create_by_dam(cur, name, sire_id, dam_id, yob, page=None):
         # Update horses if rows are emmpty
         cur.execute("""
                     UPDATE horses SET
-                        name     = COALESCE(name, ?),
-                        name_key = COALESCE(name_key, ?),
-                        sire_id  = COALESCE(sire_id, ?)
-                    WHERE horse_id = ?""", (name, name_key(name), sire_id, horse_id))
+                        name      = COALESCE(name, ?),
+                        name_norm = COALESCE(name_norm, ?),
+                        country   = COALESCE(country, ?),
+                        sire_id   = COALESCE(sire_id, ?)
+                    WHERE horse_id = ?""", (name, norm, country, sire_id, horse_id))
         return horse_id
 
-    cur.exeucte("INSERT INTO horses (name, name_key, sire_id, dam_id, yob) VALUES (?, ?, ?, ?, ?)",
-                (name, name_key(name), sire_id, dam_id, yob))
+    cur.execute("INSERT INTO horses (name, name_norm, country, sire_id, dam_id, year_foaled) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, norm, country, sire_id, dam_id, yob))
     return cur.lastrowid
 
 
 def find_or_create_ancestor(cur, name, sire_id=None, dam_id=None):
-    key = name_key(name)
+    norm, country = split_name(name) 
     row = cur.execute("""
                       SELECT horse_id FROM horses
-                      WHERE name_key = ?
+                      WHERE name_norm = ?
+                        AND country IS ?
                         AND (sire_id IS NULL or ? IS NULL OR sire_id = ?)
                         AND (dam_id  IS NULL or ? IS NULL OR dam_id  = ?)
-                      LIMIT 1""", (match_form(name), sire_id, sire_id, dam_id, dam_id)).fetchone()
+                      LIMIT 1""", (norm, country, sire_id, sire_id, dam_id, dam_id)).fetchone()
 
     if row:
         cur.execute("""
@@ -192,8 +211,8 @@ def find_or_create_ancestor(cur, name, sire_id=None, dam_id=None):
                     WHERE horse_id =?""", (sire_id, dam_id, row[0]))
         return row[0]
 
-    cur.execute("INSERT INTO horses (name, name_key, sire_id, dam_id) VALUES (?, ?, ?, ?)",
-                (name, key, sire_id, dam_id))
+    cur.execute("INSERT INTO horses (name, name_norm, country, sire_id, dam_id) VALUES (?, ?, ?, ?, ?)",
+                (name, norm, country, sire_id, dam_id))
     return cur.lastrowid
 
 
