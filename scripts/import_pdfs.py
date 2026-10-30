@@ -20,7 +20,7 @@ DB_FILE      = "../docs/horses.db"
 
 
 sire_line = re.compile(r"^By [A-Z '()-]+ \(\d{4}\)", re.MULTILINE)
-name_line = re.compile(r"^[A-Z][A-Z().' -]+$")
+name_line = re.compile(r"^(?:One Share in )?[A-Z][A-Z().' -]+$")
 unnamed = re.compile(r"^(BAY|DARK BAY OR BROWN|GRAY OR ROAN|BLACK|GRAY|ROAN|WHITE)\s+"
                      r"(COLT|FILLY|GELDING|RIDGLING|HORSE|MARE)")
 country_re = re.compile(r"(.*?)\s*\(([A-Z]{2,3})\)$")
@@ -58,7 +58,7 @@ def parse_horse(in_path):
         m = page_line.match(line)
         if m:
             if page is not None and not found_name:
-                out.write(f"PAGE {page}: no name line found\n\n")
+                print(f"PAGE {page}: no name line found\n\n")
             page = int(m[1])
             found_name = False
             continue
@@ -256,7 +256,7 @@ def load_into_db(horses, db_path):
 if __name__ == "__main__":
     for pdf_path in sorted(KEE_PDF_PATH.glob("*.pdf")):
         print(f"---{pdf_path.name}---")
-        extract_3cross(PDF_FILE, THREE_CROSS)
+        extract_3cross(pdf_path, THREE_CROSS)
         horses = list(parse_horse(THREE_CROSS))
         write_review(horses, LABELED_FILE)
         load_into_db(horses, DB_FILE)

@@ -2,8 +2,8 @@
   "serverMode": "chunked",
   "urlPrefix": "horses.db?part=",
   "suffixLength": 1,
-  "serverChunkSize": 61100032,
-  "databaseLengthBytes": 61100032,
+  "serverChunkSize": 85950464,
+  "databaseLengthBytes": 85950464,
   "requestChunkSize": 4096,
-  "cacheBust": "1793360694"
+  "cacheBust": "1793370141"
 }
