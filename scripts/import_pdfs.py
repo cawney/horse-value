@@ -144,7 +144,7 @@ def write_review(horses, out_path):
         ("Dam dam", "dam_dam"), ("Dam YOB", "dam_yob"),
     ]
 
-    wtih open(out_path, "w", encoding="utf-8"):
+    with open(out_path, "w", encoding="utf-8"):
         for h in horses:
             for label, key in labels:
                 out.write(f"{label}: {h[key]}\n")
