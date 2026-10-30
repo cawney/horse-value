@@ -100,7 +100,8 @@ def parse_horse(in_path):
 
         sire           = at(14)
         dam            = at(15)
-        dam_yob        = at(16)
+        m = year_only.match(at(16))
+        dam_yob        = int(m[1]) if m else None
 
         horse = {
             "page":           page,
