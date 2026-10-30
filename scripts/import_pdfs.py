@@ -4,8 +4,10 @@
 
 import re
 import sqlite3
+from pathlib import Path
 import pymupdf  # pyright: ignore[reportMissingImports]
 
+KEE_PDF_PATH = Path("../data/kee/pdf/")
 PDF_FILE     = "../data/kee/pdf/jan-2011.pdf"
 THREE_CROSS  = "texttest.txt"
 LABELED_FILE = "regextest.txt"
@@ -252,7 +254,9 @@ def load_into_db(horses, db_path):
 
 
 if __name__ == "__main__":
-    extract_3cross(PDF_FILE, THREE_CROSS)
-    horses = list(parse_horse(THREE_CROSS))
-    write_review(horses, LABELED_FILE)
-    load_into_db(horses, DB_FILE)
+    for pdf_path in sorted(KEE_PDF_PATH.glob("*.pdf")):
+        print(f"---{pdf_path.name}---")
+        extract_3cross(PDF_FILE, THREE_CROSS)
+        horses = list(parse_horse(THREE_CROSS))
+        write_review(horses, LABELED_FILE)
+        load_into_db(horses, DB_FILE)
