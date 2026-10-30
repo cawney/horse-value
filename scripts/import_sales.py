@@ -55,12 +55,12 @@ HEADER_ALIASES = {
         "horse_name":   ["Horse Name", "NAME"],
         "sex":          ["SEX", "Sex"],
         "color":        ["Color", "COLOR"],
-        "year_foaled":  ["DOB", "YEAR OF BIRTH", "Foaling Date", "foaling year"],
+        "year_foaled":  ["DOB", "YEAR OF BIRTH", "Foaling Date", "foaling year", "YOB"],
         "sire":         ["Sire Name", "Sire", "SIRE"],
         "dam":          ["Dam Name", "Dam", "DAM"],
         "bms":          ["Dam Sire", "Broodmare Sire", "SIRE OF DAM"],
         "in_foal_to":   ["COVERING SIRE", "Covering Sire"],
-        "consignor":    ["PROPERTY LINE", "Consignor", "Property Line 1"],
+        "consignor":    ["PROPERTY LINE", "Consignor", "Property Line 1", "CONSIGNOR NAME"],
         "consignor_2":  ["property line 2"],
         "buyer":        ["Buyer Name", "PURCHASER"],
         "price":        ["Hammer Price", "PRICE", "Sale Price"],
@@ -104,7 +104,7 @@ COLOR_NAMES = {
 }
 
 MONTHS = {m: i for i, m in enumerate(
-    ['JAN', 'FEB', 'MAR', 'ARP', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], 1)}
+    ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], 1)}
 
 
 ###############################################################################
