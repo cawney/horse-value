@@ -90,8 +90,8 @@ SEX_CODES = {"MARE": "M", "FILLY": "F", "COLT": "C", "GELDING": "G",
              "HORSE": "H", "RIDGLING": "R"}
 
 COLOR_NAMES = {
-        'BAY':                  'BAY',
-        'B':                    'BAY',
+        'BAY':                  'Bay',
+        'B':                    'Bay',
         'DARK BAY OR BROWN':    'Dark Bay or Brown',
         'DKB':                  'Dark Bay or Brown',
         'DB/BR':                'Dark Bay or Brown',
@@ -139,7 +139,7 @@ def build_header_map(headers):
 UNNAMED_RE = re.compile(
         r"^(unnamed|n/?a|" #unnamed
         r"hip \d+|" # Hip number for name
-        r"\d{4}-[A-Za-z ]+" # 2025-Dam Name
+        r"\d{4}-[A-Za-z ]+|" # 2025-Dam Name
         r"(bay|dark bay|brown|dk b/br|chestnut|grey|gray|roan|b|ch|gr|ro|dkb)" # colors
         r"(\s*or\s*\w+)?\s+(colt|filly|mare|gelding|horse|ridgling|c|f|m|g|r))$", # OR like Grey OR roan
         re.IGNORECASE,
@@ -400,7 +400,7 @@ def transform_row(raw, header_map, path):
     # if RNA, I still want to see the price
     if status not in ("SOLD", "PRIVATE"):
         buyer = None
-    if status not in ("SOLD", "PRIAVTE", "RNA"):
+    if status not in ("SOLD", "PRIVATE", "RNA"):
         price = None
 
     consignor = " ".join(filter(None, (clean_text(r.get("consignor")),
@@ -417,7 +417,7 @@ def transform_row(raw, header_map, path):
         "year_foaled": clean_int(r.get("year_foaled")),
         "sire":        parse_name(r.get("sire")),
         "dam":         parse_name(r.get("dam")),
-        "damsire":     parse_name(r.get("damsire")),
+        "damsire":     parse_name(r.get("bms")),
         "in_foal_to":  parse_name(r.get("in_foal_to")),
         "session":     clean_text(r.get("session")),
         "horse_type":  clean_text(r.get("horse_type")),
